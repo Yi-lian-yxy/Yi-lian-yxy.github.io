@@ -109,6 +109,88 @@
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
     }
     footer a { color: #fff; }
+    /* ===== 答题门 ===== */
+    #quiz-gate {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s;
+    }
+    #quiz-gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .quiz-box { text-align: center; max-width: 420px; padding: 24px; }
+    .quiz-dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 28px; }
+    .quiz-dots span {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: rgba(0, 0, 0, 0.12); transition: all 0.4s ease;
+    }
+    .quiz-dots span.active { background: var(--accent); transform: scale(1.25); }
+    .quiz-dots span.done { background: #22c55e; }
+    .quiz-q {
+      font-size: 22px; font-weight: 600; color: var(--text);
+      margin-bottom: 8px; transition: all 0.35s ease;
+    }
+    .quiz-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .quiz-q.switch { opacity: 0; transform: translateY(14px); }
+    .quiz-input {
+      width: 100%; padding: 13px 18px; font-size: 17px;
+      border: 2px solid rgba(0, 0, 0, 0.12); border-radius: 12px;
+      outline: none; text-align: center; background: #fff;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      font-family: inherit;
+    }
+    .quiz-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12); }
+    .quiz-btn {
+      margin-top: 16px; padding: 12px 42px; font-size: 16px; font-weight: 500;
+      border: none; border-radius: 12px; cursor: pointer;
+      background: var(--accent); color: #fff; font-family: inherit;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .quiz-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+    .quiz-btn:active { transform: scale(0.96); }
+    .quiz-msg {
+      height: 22px; margin-top: 14px; font-size: 14px;
+      color: var(--text-muted); transition: opacity 0.3s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); } 40% { transform: translateX(10px); }
+      60% { transform: translateX(-7px); } 80% { transform: translateX(7px); }
+    }
+    .quiz-box.shake { animation: shake 0.45s ease; }
+    .quiz-box.shake .quiz-input { border-color: #e24b4a; }
+    /* ===== 彩蛋横幅 ===== */
+    #banner-wrap {
+      position: fixed; inset: 0; z-index: 200;
+      display: none; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    #banner-wrap.show { display: flex; }
+    #banner-img {
+      max-width: 82vw; max-height: 62vh;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      animation: banner-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes banner-in {
+      0% { transform: scale(0.2) rotate(-8deg); opacity: 0; }
+      70% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes banner-out {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      25% { transform: scale(1.12) rotate(-4deg); opacity: 1; }
+      100% {
+        transform: scale(0.05) translateY(-90vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+    #banner-img.out { animation: banner-out 1s cubic-bezier(0.5, -0.3, 0.8, 0.4) both; }
+    @media (max-width: 480px) {
+      .quiz-q { font-size: 19px; }
+      .quiz-box { padding: 16px; }
+    }
     @media (max-width: 900px) {
       .layout { flex-direction: column; }
       .col-left, .col-right { width: 100%; }
@@ -172,5 +254,108 @@
     </div>
   </div>
   <footer>© 2026 易礼安</footer>
+
+  <!-- 答题门 -->
+  <div id="quiz-gate">
+    <div class="quiz-box" id="quiz-box">
+      <div class="quiz-dots">
+        <span id="dot1" class="active"></span>
+        <span id="dot2"></span>
+      </div>
+      <p class="quiz-q" id="quiz-q">第一关 · 我真名的缩写是？</p>
+      <p class="quiz-sub" id="quiz-sub">小写字母 · 答对才能看到我的主页</p>
+      <input class="quiz-input" id="quiz-input" type="text" autocomplete="off" spellcheck="false">
+      <br>
+      <button class="quiz-btn" id="quiz-btn">解锁</button>
+      <p class="quiz-msg" id="quiz-msg">只有两关，别紧张</p>
+    </div>
+  </div>
+
+  <!-- 彩蛋横幅 -->
+  <div id="banner-wrap">
+    <img id="banner-img" src="banner.webp" alt="恭喜你考了第一名">
+  </div>
+
+  <script>
+    (function () {
+      var ANSWERS = ["yxy", "阅读"];
+      var WRONG_MSGS = [
+        "不对哦～提示是不存在的，自己想",
+        "错了，再想想，我不剧透",
+        "差一点？不，是差很多",
+        "这个答案它不认识路",
+        "再来，反正我不累"
+      ];
+      var step = 0;
+      var gate = document.getElementById("quiz-gate");
+      var box = document.getElementById("quiz-box");
+      var qEl = document.getElementById("quiz-q");
+      var subEl = document.getElementById("quiz-sub");
+      var input = document.getElementById("quiz-input");
+      var btn = document.getElementById("quiz-btn");
+      var msg = document.getElementById("quiz-msg");
+      var dot1 = document.getElementById("dot1");
+      var dot2 = document.getElementById("dot2");
+      var bannerWrap = document.getElementById("banner-wrap");
+      var bannerImg = document.getElementById("banner-img");
+      var wrongCount = 0;
+
+      function submit() {
+        var val = (input.value || "").trim().toLowerCase();
+        if (!val) return;
+        if (val === ANSWERS[step]) {
+          step++;
+          if (step === 1) {
+            dot1.className = "done";
+            dot2.className = "active";
+            qEl.classList.add("switch");
+            subEl.classList.add("switch");
+            msg.style.opacity = "0";
+            setTimeout(function () {
+              qEl.textContent = "第二关 · 我目前最大的爱好是？";
+              subEl.textContent = "两个字 · 每天都在做的那种";
+              input.value = "";
+              qEl.classList.remove("switch");
+              subEl.classList.remove("switch");
+              msg.textContent = "最后一关，冲";
+              msg.style.opacity = "1";
+            }, 380);
+          } else {
+            dot2.className = "done";
+            msg.textContent = "全对！恭喜通关";
+            openGate();
+          }
+        } else {
+          wrongCount++;
+          box.classList.remove("shake");
+          void box.offsetWidth;
+          box.classList.add("shake");
+          msg.textContent = WRONG_MSGS[Math.min(wrongCount - 1, WRONG_MSGS.length - 1)];
+          input.value = "";
+          input.focus();
+        }
+      }
+
+      function openGate() {
+        setTimeout(function () {
+          gate.classList.add("hidden");
+          bannerWrap.classList.add("show");
+          setTimeout(function () {
+            bannerImg.classList.add("out");
+          }, 3000);
+          setTimeout(function () {
+            bannerWrap.classList.remove("show");
+            bannerImg.classList.remove("out");
+          }, 4050);
+        }, 700);
+      }
+
+      btn.addEventListener("click", submit);
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") submit();
+      });
+      setTimeout(function () { input.focus(); }, 300);
+    })();
+  </script>
 </body>
 </html>
