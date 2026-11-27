@@ -72,10 +72,15 @@
       width: 100%;
       border-radius: 10px;
       display: block;
-      margin-bottom: 14px;
+      margin-bottom: 6px;
       border: 1px solid var(--border);
+      transition: transform 0.3s ease;
     }
-    .photo-item:last-child { margin-bottom: 0; }
+    .photo-item:hover { transform: scale(1.03) rotate(-0.5deg); }
+    .photo-cap {
+      font-size: 12px; color: var(--text-muted);
+      text-align: center; margin-bottom: 16px;
+    }
     .placeholder {
       border: 1.5px dashed rgba(0, 0, 0, 0.2);
       border-radius: 10px;
@@ -206,13 +211,10 @@
         <div class="avatar">易</div>
         <h1>易礼安</h1>
         <p class="tagline">你劳nb！culr nb！</p>
-        <div class="links">
-          <a href="https://github.com/Yi-lian-yxy" target="_blank" rel="noopener">GitHub</a>
-        </div>
       </div>
       <div class="card">
         <h2>关于我</h2>
-        <p>yx媛nb</p>
+        <p>斯多葛主义者，吾道不孤</p>
       </div>
       <div class="card">
         <h2>项目</h2>
@@ -225,10 +227,16 @@
       <div class="card">
         <h2>photo</h2>
         <!-- 加图方法：把图片直接上传到仓库根目录，然后在这里插入
-             <img class="photo-item" src="你的图片名.jpg" alt=""> -->
-        <div class="placeholder">图片待添加</div>
-        <div class="placeholder">图片待添加</div>
-        <p class="hint">把图片发我或上传到仓库 images/ 目录即可填充这里</p>
+             <img class="photo-item" src="你的图片名.jpg" alt="">
+             <p class="photo-cap">图片说明</p> -->
+        <img class="photo-item" src="photo1.jpg" alt="肥猫">
+        <p class="photo-cap">沉思中的肥猫 · 淡定，是它教我的</p>
+        <img class="photo-item" src="photo2.jpg" alt="佛香阁">
+        <p class="photo-cap">佛香阁 · 屹立百年，风雨不动</p>
+        <img class="photo-item" src="photo3.jpg" alt="梵高在午睡">
+        <p class="photo-cap">梵高在午睡 · 麦垛里也有梦</p>
+        <img class="photo-item" src="photo4.jpg" alt="晚霞">
+        <p class="photo-cap">晚霞 · 每天的落幕都值得抬头看</p>
       </div>
 
       <!-- 右栏 2：智囊团 -->
@@ -253,7 +261,11 @@
       </div>
     </div>
   </div>
-  <footer>© 2026 易礼安</footer>
+  <footer>
+    © 2026 易礼安
+    <br>
+    <span id="stoic-quote" style="font-size:12px; opacity:0.85;"></span>
+  </footer>
 
   <!-- 答题门 -->
   <div id="quiz-gate">
@@ -337,6 +349,7 @@
       }
 
       function openGate() {
+        try { localStorage.setItem("yxy_quiz_passed", "1"); } catch (e) {}
         setTimeout(function () {
           gate.classList.add("hidden");
           bannerWrap.classList.add("show");
@@ -351,10 +364,37 @@
       }
 
       btn.addEventListener("click", submit);
+
+      /* 答过一次就记住：通关后 localStorage 永久记录，下次直接放行 */
+      try {
+        if (localStorage.getItem("yxy_quiz_passed") === "1") {
+          gate.style.transition = "none";
+          gate.classList.add("hidden");
+        }
+      } catch (e) { /* 浏览器隐私模式等场景静默跳过 */ }
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter") submit();
       });
       setTimeout(function () { input.focus(); }, 300);
+
+      /* 标签页彩蛋：切走显示"咦，人呢？"，切回来恢复 */
+      var baseTitle = document.title;
+      document.addEventListener("visibilitychange", function () {
+        document.title = document.hidden ? "咦，人呢？—— 易礼安" : baseTitle;
+      });
+
+      /* 每天换一句斯多葛语录，按日期轮换 */
+      var QUOTES = [
+        "你所控制的是你的心灵，其余皆非你所能主宰。 —— 爱比克泰德",
+        "阻碍行动的，也可以推动行动；阻碍道路的，也可以成为道路。 —— 马可·奥勒留",
+        "我们受苦，往往更多是在想象中，而非现实中。 —— 塞涅卡",
+        "好运不过是另一个名字：准备遇上了机会。 —— 爱比克泰德",
+        "不要为整场人生担忧，只问当下这一步该怎么走。 —— 马可·奥勒留",
+        "失去的只是你原本就拥有的东西。 —— 爱比克泰德",
+        "苦难让人出名，是在苦难中保持稳定的人。 —— 塞涅卡"
+      ];
+      var qEl2 = document.getElementById("stoic-quote");
+      if (qEl2) qEl2.textContent = QUOTES[new Date().getDate() % QUOTES.length];
     })();
   </script>
 </body>
