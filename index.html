@@ -70,10 +70,14 @@
     .col-right h2 { margin-bottom: 16px; }
     .photo-item {
       width: 100%;
+      height: 170px;
+      object-fit: cover;
+      object-position: center;
       border-radius: 10px;
       display: block;
       margin-bottom: 6px;
       border: 1px solid var(--border);
+      cursor: zoom-in;
       transition: transform 0.3s ease;
     }
     .photo-item:hover { transform: scale(1.03) rotate(-0.5deg); }
@@ -112,6 +116,7 @@
       color: rgba(255, 255, 255, 0.95);
       font-size: 14px;
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+      margin-bottom: 165px;
     }
     footer a { color: #fff; }
     /* ===== 答题门 ===== */
@@ -192,6 +197,72 @@
       }
     }
     #banner-img.out { animation: banner-out 1s cubic-bezier(0.5, -0.3, 0.8, 0.4) both; }
+    /* ===== 阅读弹幕 ===== */
+    #danmaku {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+      height: 178px; overflow: hidden; pointer-events: none;
+      padding: 0 0 6px;
+    }
+    .dk-row { position: relative; height: 32px; margin-bottom: 16px; }
+    .dk-track {
+      display: flex; width: max-content;
+      animation: dk-marquee var(--d) linear infinite;
+      will-change: transform;
+    }
+    .dk-row:hover .dk-track, .dk-row.paused .dk-track { animation-play-state: paused; }
+    .dk-half { display: flex; gap: 48px; padding-right: 48px; align-items: center; }
+    .dk-item { pointer-events: auto; }
+    .dk-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; color: var(--text); cursor: pointer;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95), 0 0 8px rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+      transition: transform 0.25s ease, color 0.25s ease;
+    }
+    .dk-pill:hover { transform: scale(1.1) rotate(-0.5deg); color: var(--accent); }
+    .dk-row.paused .dk-pill.on { color: var(--accent); }
+    .dk-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dk-row.paused .dk-dot { animation: dk-pulse 1.2s ease infinite; }
+    @keyframes dk-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.6); opacity: 0.55; }
+    }
+    @keyframes dk-marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    #dk-source {
+      height: 20px; margin-top: 2px;
+      font-size: 11px; color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      padding-left: 16px; opacity: 0; transition: opacity 0.3s ease;
+    }
+    /* ===== 照片折叠 ===== */
+    .photo-head { display: flex; align-items: center; justify-content: space-between; }
+    .photo-head h2 { margin-bottom: 0; }
+    #photo-toggle {
+      border: 1px solid var(--border); background: rgba(255, 255, 255, 0.9);
+      border-radius: 999px; padding: 4px 14px; font-size: 12px;
+      color: var(--text-secondary); cursor: pointer; font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    #photo-toggle:hover { color: var(--accent); border-color: var(--accent); }
+    .photo-card.collapsed #photo-list { display: none; }
+    /* ===== 照片灯箱 ===== */
+    #lightbox {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0, 0, 0, 0.85);
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px; cursor: zoom-out;
+    }
+    #lightbox.show { display: flex; }
+    #lightbox img {
+      max-width: 92vw; max-height: 84vh;
+      border-radius: 10px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+      animation: banner-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    #lightbox .lb-cap { color: #fff; font-size: 14px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
     @media (max-width: 480px) {
       .quiz-q { font-size: 19px; }
       .quiz-box { padding: 16px; }
@@ -224,11 +295,12 @@
 
     <!-- 右栏 1：photo -->
     <div class="col col-right">
-      <div class="card">
-        <h2>photo</h2>
-        <!-- 加图方法：把图片直接上传到仓库根目录，然后在这里插入
-             <img class="photo-item" src="你的图片名.jpg" alt="">
-             <p class="photo-cap">图片说明</p> -->
+      <div class="card photo-card collapsed">
+        <div class="photo-head">
+          <h2>photo</h2>
+          <button id="photo-toggle">展开照片 · 4 张 ▾</button>
+        </div>
+        <div id="photo-list">
         <img class="photo-item" src="photo1.jpg" alt="肥猫">
         <p class="photo-cap">沉思中的肥猫 · 淡定，是它教我的</p>
         <img class="photo-item" src="photo2.jpg" alt="佛香阁">
@@ -237,6 +309,8 @@
         <p class="photo-cap">梵高在午睡 · 麦垛里也有梦</p>
         <img class="photo-item" src="photo4.jpg" alt="晚霞">
         <p class="photo-cap">晚霞 · 每天的落幕都值得抬头看</p>
+        <p class="hint">点击照片可查看完整大图</p>
+        </div>
       </div>
 
       <!-- 右栏 2：智囊团 -->
@@ -395,6 +469,114 @@
       ];
       var qEl2 = document.getElementById("stoic-quote");
       if (qEl2) qEl2.textContent = QUOTES[new Date().getDate() % QUOTES.length];
+    })();
+
+    /* ===== 阅读弹幕：三行循环，整行联动暂停，出处悬浮显示 ===== */
+    (function () {
+      var QUOTES = [
+        { t: "我从未想过，要撕开面目，要透过人的表象去触摸他们的内心。", s: "《蛇结》", c: "#22c55e" },
+        { t: "世界以悠长的节奏向我叹气，带给我永生不死者拥有的淡漠与宁静。", s: "《在我身上有一个不可战胜的夏天》", c: "#d97706" },
+        { t: "在挤满了人类之恶的潘多拉之盒中，希腊人把希望放到最后一个拿出。", s: "《在我身上有一个不可战胜的夏天》", c: "#8b5cf6" },
+        { t: "这正在行进的欢乐，如尘世间的朝圣者般淡漠与专注，我应当一步一步地跟随它。", s: "《在我身上有一个不可战胜的夏天》", c: "#e24b4a" },
+        { t: "发现别人的错误总比发现自己的错误更容易。", s: "《思考，快与慢》", c: "#22c55e" },
+        { t: "当你对执行一个任务越来越熟练时，需要付出的努力程度就会降低。", s: "《思考，快与慢》", c: "#d97706" },
+        { t: "你觉得自己很了解自己，但其实你错了。", s: "《思考，快与慢》", c: "#8b5cf6" },
+        { t: "你的直觉会产生极端预测，而你也很容易对这种极端信心满满。", s: "《思考，快与慢》", c: "#22c55e" },
+        { t: "他们貌似又对自己的无知一无所知。", s: "《思考，快与慢》", c: "#22c55e" },
+        { t: "人们在收益状态下更倾向于规避损失，在亏损状态下更倾向于承担风险。", s: "《思考，快与慢》", c: "#d97706" },
+        { t: "人们极度厌恶为得到其他好处而以增加风险为代价的交易。", s: "《思考，快与慢》", c: "#22c55e" },
+        { t: "在获得时，偏向确定的事；在损失时，偏向赌一把。", s: "《思考，快与慢》", c: "#d97706" },
+        { t: "聚焦错觉的本质是眼见即为事实。", s: "《思考，快与慢》", c: "#22c55e" }
+      ];
+      var box = document.createElement("div");
+      box.id = "danmaku";
+      var source = document.createElement("div");
+      source.id = "dk-source";
+      document.body.appendChild(box);
+      document.body.appendChild(source);
+      var speeds = [46, 60, 52];
+      var rows = [[], [], []];
+      QUOTES.forEach(function (q, i) { rows[i % 3].push(q); });
+      rows.forEach(function (items, r) {
+        var row = document.createElement("div");
+        row.className = "dk-row";
+        var track = document.createElement("div");
+        track.className = "dk-track";
+        track.style.setProperty("--d", speeds[r] + "s");
+        for (var half = 0; half < 2; half++) {
+          var hd = document.createElement("div");
+          hd.className = "dk-half";
+          items.forEach(function (q, i) {
+            var el = document.createElement("span");
+            el.className = "dk-item";
+            var pill = document.createElement("span");
+            pill.className = "dk-pill";
+            var dot = document.createElement("i");
+            dot.className = "dk-dot";
+            dot.style.background = q.c;
+            var text = document.createElement("span");
+            text.textContent = q.t;
+            pill.appendChild(dot);
+            pill.appendChild(text);
+            el.appendChild(pill);
+            el.addEventListener("mouseenter", function () {
+              source.textContent = "—— " + q.s;
+              source.style.opacity = "1";
+            });
+            el.addEventListener("click", function (e) {
+              e.stopPropagation();
+              var on = row.classList.toggle("paused");
+              el.classList.toggle("on", on);
+              if (on) {
+                source.textContent = "—— " + q.s + "（该行已暂停，再点一下继续）";
+                source.style.opacity = "1";
+              } else {
+                source.style.opacity = "0";
+              }
+            });
+            hd.appendChild(el);
+          });
+          track.appendChild(hd);
+        }
+        row.appendChild(track);
+        row.addEventListener("mouseleave", function () {
+          if (!row.classList.contains("paused")) source.style.opacity = "0";
+        });
+        box.appendChild(row);
+      });
+      box.appendChild(source);
+    })();
+
+    /* ===== photo 折叠按钮 ===== */
+    (function () {
+      var card = document.querySelector(".photo-card");
+      var btn = document.getElementById("photo-toggle");
+      if (!card || !btn) return;
+      btn.addEventListener("click", function () {
+        var collapsed = card.classList.toggle("collapsed");
+        btn.textContent = collapsed ? "展开照片 · 4 张 ▾" : "收起照片 ▴";
+      });
+    })();
+
+    /* ===== 照片灯箱：点击查看完整大图 ===== */
+    (function () {
+      var lb = document.createElement("div");
+      lb.id = "lightbox";
+      var img = document.createElement("img");
+      var cap = document.createElement("p");
+      cap.className = "lb-cap";
+      lb.appendChild(img);
+      lb.appendChild(cap);
+      document.body.appendChild(lb);
+      document.querySelectorAll(".photo-item").forEach(function (p) {
+        p.addEventListener("click", function () {
+          img.src = p.src;
+          var pc = p.nextElementSibling;
+          cap.textContent = pc ? pc.textContent.replace(/^.*· /, "") : "";
+          lb.classList.add("show");
+        });
+      });
+      lb.addEventListener("click", function () { lb.classList.remove("show"); });
     })();
   </script>
 </body>
